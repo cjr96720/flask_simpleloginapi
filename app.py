@@ -78,20 +78,26 @@ members_schema = MembersSchema(many=True)
 
 class EmailCheck(Resource):
 
-    def get(self):
+    def post(self):
         memberemail = request.json['memberemail']
+        # print(memberemail)
+
         member = Members.query.filter_by(memberemail=memberemail).first()
+        result = member_schema.dumps(member)
+        # print(result)
         if member:
-            return {'Message': 'Member exists'}
+            # return {'Message': 'Member exists'}
+            return json.loads(result)
 
 
 class Login(Resource):
-    
+
     def post(self):
         memberemail = request.json['memberemail']
         memberpwd = request.json['memberpwd']
 
         member = Members.query.filter_by(memberemail=memberemail).first()
+        info = member_schema.dumps(member)
         if member:
             pwd = Members.query.filter_by(
                 memberemail=memberemail).with_entities(Members.memberpwd).first()
@@ -101,10 +107,11 @@ class Login(Resource):
             password = bcrypt.check_password_hash(
                 result_json['memberpwd'], memberpwd)
             if not password:
-                return {'Message' : 'Wrong password'}
+                return {'Message': 'Wrong password'}
         else:
-            return {'Message' : 'Member does not exist'}
+            return {'Message': 'Member does not exist'}
 
+        return json.loads(info)
 
 class Register(Resource):
 
